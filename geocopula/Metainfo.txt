@@ -1,6 +1,6 @@
 Name of QuantLet : geocopula
 
-Published in : 
+Published in : MTS
 
 Description : 'Plots the fitted empirical and parameterised variorums on the transformed data.'
 
