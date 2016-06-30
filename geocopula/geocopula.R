@@ -124,9 +124,7 @@ np = 59
 yy_g = matrix(0, np, 5)
 
 for (k in 0:(np - 1)) {
-  yy_g[np - k, ] = pre_term1(d4[1:(tp - k), ], tlag = 3, par = pre_data[2, 
-                                                                        ][1:3])
-  
+  yy_g[np - k, ] = pre_term1(d4[1:(tp - k), ], tlag = 3, par = pre_data[2, ][1:3])
 }
 
 yy = rbind(d4[1:tlag, ], as.matrix(yy_g))
@@ -139,12 +137,9 @@ for (i in 1:ncountry) {
        col = "blue")
   lines(d3[, i], type = "l", xlab = "month", ylab = "inflation rate", 
         col = "red")
-  
-  
-  
 }
 
-# save(y4, d3, file = 'result_final.dat')
+#save(y4, d3, file = 'result_final.dat')
 
 res = load("result_final.dat")
 
