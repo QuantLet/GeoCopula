@@ -10,17 +10,17 @@ Keywords :
 - time-series
 - data visualization
 - copula
+- estimation
+- kernel
 
 See also : 'MTS_afns_de, MTS_afns_fr, MTS_afns_uk, MTS_afns_it, 
 MTS_afns_sw'
 
-Author : 
+Author : Weining Wang
 
-Submitted :
+Submitted : Thur, June 30 2016 by Shi Chen
 
-Datafile : 'bb.dat, commonans0915mac.RData'
+Datafile : 'bb.dat, fivecountries.RData'
 
-Example :
-- 'The empirical fitted variogram by GeoCopula.'
-- 'The parametrically fitted variogram by GeoCopula.'
+Example : 
 

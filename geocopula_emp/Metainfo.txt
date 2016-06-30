@@ -2,25 +2,22 @@ Name of QuantLet : geocopula_emp
 
 Published in : MTS
 
-Description : 'Produces the estimation results using GeoCopula approach.fitted empirical and parameterised variorums on the transformed data.'
-
+Description : 'Produces the plot for parametrically fitted variogram.'
 Keywords : 
 - graphical representation
 - plot 
 - time-series
 - data visualization
-
+- copula
 
 See also : 'MTS_afns_de, MTS_afns_fr, MTS_afns_uk, MTS_afns_it, 
 MTS_afns_sw'
 
-Author : 
+Author : Weining Wang
 
-Submitted :
+Submitted : Thur, June 30 2016 by Shi Chen
 
-Datafile : 'bb.dat, commonans0915mac.RData'
+Datafile : 'vvd4t.RData'
 
-Example :
-- 'The empirical fitted variogram by GeoCopula.'
-- 'The parametrically fitted variogram by GeoCopula.'
+Example : 'The empirical fitted variogram by GeoCopula.'
 
