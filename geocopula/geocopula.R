@@ -16,17 +16,16 @@ resultsres = commonans0915mac$vt  #uk, germany, france, italy, sweden
 nrow(resultsres)
 ncol(resultsres)
 
-
 source("helpfun.r")
 
 # the basic setting for optimization
-nu = 0.5
+nu     = 0.5
 reltol = 0.01
-trace = TRUE
-maxit = 50000
-sigma = 1
-cutoff = 2000  # almost include all possible distance
-tlag = 20  # tlag is observed from WLS variogram
+trace  = TRUE
+maxit  = 50000
+sigma  = 1
+cutoff = 2000 
+tlag   = 20 
 
 namelist = c("UK", "Germany", "France", "Italy", "Sweden")
 location = read.csv("location_country.csv")
@@ -36,50 +35,45 @@ location = location[namelist, ]
 location = location[, -1]
 
 ## transform to copulae
-d3 = t(resultsres)
-d4 = qnorm(transformC(d3) * nrow(d3)/(nrow(d3) + 1))  #formula 3.12 in paper
+d3       = t(resultsres)
+d4       = qnorm(transformC(d3) * nrow(d3)/(nrow(d3) + 1))  #formula 3.12 in paper
 location = SpatialPoints(location, proj4string = CRS("+proj=longlat +datum=WGS84"))
-start = c(2009, 11)
-end = c(2014, 12)
-time = seq(ISOdate(start[1], start[2], 28), ISOdate(end[1], end[2], 28), 
+start    = c(2009, 11)
+end      = c(2014, 12)
+time     = seq(ISOdate(start[1], start[2], 28), ISOdate(end[1], end[2], 28), 
            by = "1 months")
-data = d4
-da = as.data.frame(as.vector(t(data)))
+data     = d4
+da       = as.data.frame(as.vector(t(data)))
+
+
 colnames(da) = "inf"
-inflation = STFDF(location, time, da)
+inflation    = STFDF(location, time, da)
 summary(sort(spDists(inflation@sp)))
-par("mar")
-par(mar = c(1, 1, 1, 1))
-plot(sort(spDists(inflation@sp)))
+#par("mar")
+#par(mar = c(1, 1, 1, 1))
+#plot(sort(spDists(inflation@sp)))
 vvd4 = variogram(inf ~ 1, inflation, width = 400, cutoff = 2000, tlags = 0:35)
-
-
 vvd4[1, 2:3] = 0
 
 na_indi = which(is.na(vvd4), arr.ind = TRUE)
 vvd4t = vvd4
 
 for (i in 1:nrow(na_indi)) {
-  
-  vvd4t[na_indi[i, 1], na_indi[i, 2]] = 0.5 * (vvd4[na_indi[i, 1] - 1, 
-                                                    na_indi[i, 2]] + vvd4[na_indi[i, 1] + 1, na_indi[i, 2]])
-  
+  vvd4t[na_indi[i, 1], na_indi[i, 2]] = 0.5 * 
+    (vvd4[na_indi[i, 1] - 1, na_indi[i, 2]] + vvd4[na_indi[i, 1] + 1, na_indi[i, 2]])
 }
 
 time = seq(ISOdate(start[1], start[2], 28), ISOdate(end[1], end[2], 28), 
            by = "1 months")
-
 data = d4
-da = as.data.frame(as.vector(t(data)))
+da   = as.data.frame(as.vector(t(data)))
 colnames(da) = "inf"
-inflation = STFDF(location, time, da)
-dd1 = (spDists(inflation@sp))
-
-dd = dd1
+inflation    = STFDF(location, time, da)
+dd1  = (spDists(inflation@sp))
+dd   = dd1
 rm(location, time, da, inflation, dd1)
 
-
-# WLS as, initial parameter, Chapter5.2 set multiple initial value for
+# WLS as, initial parameter, Chapter 5.2 set multiple initial value for
 # WLS estimation
 a = c(1e-10, 0.5, 1)
 b = c(1e-20, 1e-05, 0.1, 0.3)
@@ -90,15 +84,12 @@ opti_10 = opti[op, ][1, ]  #keep the best one, Chapter 5.2
 opti_10 = opti_10[4:6]  #keep only parameters needed
 
 layout(c(1, 2, 3, 4))
-
 plot_v(d4, vvd4t, as.matrix(opti_10))
-plot(vvd4t, wireframe = T, xlab = list("distance (km)", rot = 30), ylab = list("time lag (days)", 
-                                                                               rot = -35), zlab = "gamma", scales = list(arrows = F, z = list(distance = 5)), 
-     zlim = c(0, 1.2))
+plot(vvd4t, wireframe = T, xlab = list("distance (km)", rot = 30), 
+     ylab = list("time lag (days)", rot = -35), zlab = "gamma", 
+     scales = list(arrows = F, z = list(distance = 5)), zlim = c(0, 1.2))
 
 nu = 0.5
-
-
 # use c_p function generate a series sets of estimated parameters
 
 namelist = c("UK", "Germany", "France", "Italy", "Sweden")
@@ -137,9 +128,6 @@ for (k in 0:(np - 1)) {
                                                                         ][1:3])
   
 }
-
-
-
 
 yy = rbind(d4[1:tlag, ], as.matrix(yy_g))
 y4 = yy
