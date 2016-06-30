@@ -140,16 +140,13 @@ for (i in 1:ncountry) {
 }
 
 #save(y4, d3, file = 'result_final.dat')
-
 res = load("result_final.dat")
 
 par(mar = c(2, 2, 2, 2), cex = 2)
 layout(matrix(c(1, 2, 3, 4, 5, 6), 2, 3, byrow = TRUE))
 for (i in 1:ncountry) {
-  
   plot(time, y4[, i], type = "l", xlab = "", ylab = "", col = "blue", 
        lwd = 2, lty = 1, ylim = c(-0.8, 1.2))
   lines(time, d3[, i], type = "l", xlab = "", ylab = "", col = "red", 
         lwd = 2, lty = 2, ylim = c(-0.8, 1.2))
-  
 }
