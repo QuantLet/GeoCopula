@@ -13,8 +13,6 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 # load dataset of five countries
 load("fivecountries.RData")
 resultsres = commonans0915mac$vt  #uk, germany, france, italy, sweden
-#nrow(resultsres)
-#ncol(resultsres)
 
 #source("helpfun.r")
 transformC = function(data, method = "uniform") {
@@ -74,12 +72,25 @@ for (i in 1:nrow(na_indi)) {
     (vvd4[na_indi[i, 1] - 1, na_indi[i, 2]] + vvd4[na_indi[i, 1] + 1, na_indi[i, 2]])
 }
 
+start    = c(2009, 11)
+end      = c(2014, 12)
 time = seq(ISOdate(start[1], start[2], 28), ISOdate(end[1], end[2], 28), 
            by = "1 months")
+
+resultsres = commonans0915mac$vt  #uk, germany, france, italy, sweden
+d3       = t(resultsres)
+d4       = qnorm(transformC(d3) * nrow(d3)/(nrow(d3) + 1))  #formula 3.12 in paper
 data = d4
 da   = as.data.frame(as.vector(t(data)))
 colnames(da) = "inf"
-inflation    = STFDF(location, time, da)
+
+namelist = c("UK", "Germany", "France", "Italy", "Sweden")
+location = read.csv("location_country.csv")
+rownames(location) = location[, 1]
+
+location = location[namelist, ]
+location = location[, -1]
+#inflation    = STFDF(location, time, da)
 dd1  = (spDists(inflation@sp))
 dd   = dd1
 rm(location, time, da, inflation, dd1)
@@ -94,8 +105,8 @@ beta = c(1e-10, 0.01, 0.5)
 fit.count = function(vv, a, b, beta) {
   op = expand.grid(1:length(a), 1:length(b), 1:length(beta))
   fitv = function(vv, a, b, beta) {
-    k = fit.vv(vv, a, b, beta, nu)
-    return(c(k$par, k$value))
+  k = fit.vv(vv, a, b, beta, nu)
+  return(c(k$par, k$value))
   }
   k = sapply(1:nrow(op), function(i) fitv(vv, a = a[op[i, 1]], b = b[op[i, 
                                                                         2]], beta = beta[op[i, 3]]))
@@ -114,15 +125,14 @@ fit.count = function(vv, a, b, beta) {
 fit.vv = function(vv, a = 0.01, b = 0.005, beta = 0.1, nu) {
   sigma = 1
   par0 = c(a, b, beta)
-  
   fit.model = function(data0, par0, nu, sigma) {
     a = par0[1]
     b = par0[2]
     beta = par0[3]
     weightFun = data0$np/data0$gamma^2
     weightFun[1] = 0
-    gammaMod = sigma - sapply(1:nrow(data0), function(i) Kernel(data0$avgDist[i], 
-                                                                data0$timelag[i], nu, a, b, beta, sigma))
+    gammaMod = sigma - sapply(1:nrow(data0), function(i) 
+      Kernel(data0$avgDist[i], data0$timelag[i], nu, a, b, beta, sigma))
     sum = sum(weightFun * (data0$gamma - gammaMod)^2)
     return(sum)
   }
@@ -147,3 +157,4 @@ Kernel = function(h, u, nu, a, b, beta, sigma) {
 
 #system.time(opti = fit.count(vvd4t, a, b, beta))
 opti = fit.count(vvd4t, a, b, beta)
+save(opti, file = "opti.RData")

@@ -1,4 +1,4 @@
-Name of QuantLet : geocopula
+Name of QuantLet : geocopula_emp
 
 Published in : MTS
 
