@@ -10,13 +10,27 @@ lapply(libraries, function(x) if (!(x %in% installed.packages())) {
 })
 lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
-# load dataset
-load("commonans0915mac.RData")
+# load dataset of five countries
+load("fivecountries.RData")
 resultsres = commonans0915mac$vt  #uk, germany, france, italy, sweden
-nrow(resultsres)
-ncol(resultsres)
+#nrow(resultsres)
+#ncol(resultsres)
 
-source("helpfun.r")
+#source("helpfun.r")
+transformC = function(data, method = "uniform") {
+  f1 = function(x) {
+    fn = ecdf(x)
+    y = fn(x)
+    return(y)
+  }
+  nr = nrow(data)
+  nc = ncol(data)
+  data1 = sapply(1:nc, function(i) f1(data[, i]))
+  colnames(data1) = colnames(data)
+  rownames(data1) = rownames(data)
+  data1
+}
+
 
 # the basic setting for optimization
 nu     = 0.5
@@ -44,7 +58,6 @@ time     = seq(ISOdate(start[1], start[2], 28), ISOdate(end[1], end[2], 28),
            by = "1 months")
 data     = d4
 da       = as.data.frame(as.vector(t(data)))
-
 
 colnames(da) = "inf"
 inflation    = STFDF(location, time, da)
@@ -78,12 +91,84 @@ rm(location, time, da, inflation, dd1)
 a = c(1e-10, 0.5, 1)
 b = c(1e-20, 1e-05, 0.1, 0.3)
 beta = c(1e-10, 0.01, 0.5)
-system.time(opti <- fit.count(vvd4t, a, b, beta))
+
+# choice from multiple optimal points of WLS estimates
+fit.count = function(vv, a, b, beta) {
+  op = expand.grid(1:length(a), 1:length(b), 1:length(beta))
+  fitv = function(vv, a, b, beta) {
+    k = fit.vv(vv, a, b, beta, nu)
+    return(c(k$par, k$value))
+  }
+  k = sapply(1:nrow(op), function(i) fitv(vv, a = a[op[i, 1]], b = b[op[i, 
+                                                                        2]], beta = beta[op[i, 3]]))
+  xabc = function(x, abc) {
+    abc[x]
+  }
+  op[, 1] = xabc(op[, 1], a)
+  op[, 2] = xabc(op[, 2], b)
+  op[, 3] = xabc(op[, 3], beta)
+  o = cbind(op, t(k))
+  colnames(o) = c("a_i", "b_i", "beta_i", "a", "b", "beta", "value")
+  o
+}
+
+# WLS estimate
+fit.vv = function(vv, a = 0.01, b = 0.005, beta = 0.1, nu) {
+  sigma = 1
+  par0 = c(a, b, beta)
+  
+  fit.model = function(data0, par0, nu, sigma) {
+    a = par0[1]
+    b = par0[2]
+    beta = par0[3]
+    weightFun = data0$np/data0$gamma^2
+    weightFun[1] = 0
+    gammaMod = sigma - sapply(1:nrow(data0), function(i) Kernel(data0$avgDist[i], 
+                                                                data0$timelag[i], nu, a, b, beta, sigma))
+    sum = sum(weightFun * (data0$gamma - gammaMod)^2)
+    return(sum)
+  }
+  vv[1, 2:3] = 0
+  k = optim(par = par0, fit.model, data0 = vv, nu = nu, sigma = sigma, 
+            method = "L-BFGS-B", lower = c(1e-10, 1e-10, 0.1))
+  k
+}
+
+Kernel = function(h, u, nu, a, b, beta, sigma) {
+  # same as in GeoCopula
+  y = rep(1, length = length(h))
+  idx1 = which(h == 0)
+  idx2 = which(h != 0)
+  c1 = a^2 * u^2 + 1
+  c2 = a^2 * u^2 + beta
+  y[idx1] = sigma * beta/c1^nu/c2
+  y[idx2] = sigma * 2 * beta/c1^nu/c2/gamma(nu) * (b/2 * h[idx2] * (c1/c2)^0.5)^nu * 
+    besselK(b * h[idx2] * (c1/c2)^0.5, nu)
+  return(y)
+}
+
+#system.time(opti = fit.count(vvd4t, a, b, beta))
+opti = fit.count(vvd4t, a, b, beta)
 op = order(opti$value)
 opti_10 = opti[op, ][1, ]  #keep the best one, Chapter 5.2
 opti_10 = opti_10[4:6]  #keep only parameters needed
 
 layout(c(1, 2, 3, 4))
+
+plot_v = function(data, vv, par) {
+  k = list()
+  k$par = par
+  k$par[4] = 1  #sigma=1
+  data0 = vv
+  gammaMod = k$par[4] - sapply(1:nrow(data0), function(i) 
+    Kernel(data0$avgDist[i], data0$timelag[i], nu, k$par[1], k$par[2], k$par[3], k$par[4]))
+  vv1 = vv
+  vv1$gamma = gammaMod
+  plot(vv1, wireframe = T, xlab = list("distance (km)", rot = 30), ylab = list("time lag (days)", rot = -35), 
+       scales = list(arrows = F, z = list(distance = 5)), 
+       zlim = c(0, 1.2))
+}
+
 plot_v(d4, vvd4t, as.matrix(opti_10))
 plot(vvd4t, wireframe = T, xlab = list("distance (km)", rot = 30), 
      ylab = list("time lag (days)", rot = -35), zlab = "gamma", 
@@ -101,34 +186,32 @@ rownames(location) = location[, 1]
 location = location[namelist, ]
 location = location[, -1]
 
-tp = c(59:62)  # fit the data from Aug.2002 to May 2008
-
-system.time(pre_y <- sapply(1:length(tp), function(i) c_p(d4, tp[i], start)))
+# fit the data from Aug.2002 to May 2008
+tp = c(59:62)  
+system.time(pre_y = sapply(1:length(tp), function(i) c_p(d4, tp[i], start)))
 pre_y = t(pre_y)
 colnames(pre_y) = c("a", "b", "beta", "value")
 
-system.time(pre_wls <- sapply(1:length(tp), function(i) c_w(d4, tp[i], 
-                                                            start)))
+system.time(pre_wls = sapply(1:length(tp), function(i) c_w(d4, tp[i], start)))
 colnames(pre_wls) = c("a", "b", "beta")
 
 aa = load("bb.dat")
 
-pre_data = pre_data
+#pre_data = pre_data
 ## pre_data=pre_y # in case of WCL pre_data=pre_wls # in case of WLS
 mse_all = matrix(0, 8, 12)
 rownames(mse_all) = colnames(d4)
 
-tp = 62
-
-np = 59
+tp   = 62
+np   = 59
 yy_g = matrix(0, np, 5)
 
 for (k in 0:(np - 1)) {
   yy_g[np - k, ] = pre_term1(d4[1:(tp - k), ], tlag = 3, par = pre_data[2, ][1:3])
 }
 
-yy = rbind(d4[1:tlag, ], as.matrix(yy_g))
-y4 = yy
+yy       = rbind(d4[1:tlag, ], as.matrix(yy_g))
+y4       = yy
 ncountry = 5
 
 layout(matrix(c(1, 2, 3, 4, 5, 6), 2, 3, byrow = TRUE))

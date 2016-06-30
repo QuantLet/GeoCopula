@@ -1,10 +1,9 @@
 transformC = function(data, method = "uniform") {
   f1 = function(x) {
-    fn = ecdf(x)
-    y = fn(x)
-    return(y)
+  fn = ecdf(x)
+  y = fn(x)
+  return(y)
   }
-  
   nr = nrow(data)
   nc = ncol(data)
   data1 = sapply(1:nc, function(i) f1(data[, i]))
@@ -13,11 +12,9 @@ transformC = function(data, method = "uniform") {
   data1
 }
 
-
 # recover the transformed series back.
 recov = function(y, d3, mis) {
   fn = ecdf(d3[, mis])
-  
   # uniroot(function(x) fn(x),c(-1,1))
   y1 = pnorm(y)
   # k_1=which(y1>=1) y1[k_1]=1
