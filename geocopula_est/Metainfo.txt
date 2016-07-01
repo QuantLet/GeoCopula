@@ -19,7 +19,7 @@ Author : Weining Wang
 
 Submitted : Thur, June 30 2016 by Shi Chen
 
-Datafile : 'bb.dat, fivecountries.RData'
+Datafile : 'bb.dat, location_country.csv, fivecountries.RData'
 
 Example : 
 
