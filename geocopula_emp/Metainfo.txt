@@ -16,7 +16,7 @@ Author : Weining Wang
 
 Submitted : Thur, June 30 2016 by Shi Chen
 
-Datafile : 'vvd4t.RData'
+Datafile : 'location_country.csv, five countries.RData'
 
 Example : 'The empirical fitted variogram by GeoCopula.'
 
