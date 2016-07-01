@@ -10,8 +10,7 @@ Keywords :
 - data visualization
 - copula
 
-See also : 'MTS_afns_de, MTS_afns_fr, MTS_afns_uk, MTS_afns_it, 
-MTS_afns_sw'
+See also : 'geocopula_est, geocopula_par'
 
 Author : Weining Wang
 

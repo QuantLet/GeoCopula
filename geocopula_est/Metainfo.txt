@@ -13,8 +13,7 @@ Keywords :
 - estimation
 - kernel
 
-See also : 'MTS_afns_de, MTS_afns_fr, MTS_afns_uk, MTS_afns_it, 
-MTS_afns_sw'
+See also : 'geocopula_emp, geocopula_par'
 
 Author : Weining Wang
 
