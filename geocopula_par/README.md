@@ -31,6 +31,7 @@ Example : The parametrically fitted variogram by GeoCopula.
 ### R Code:
 ```r
 # clear variables and close windows
+# clear variables and close windows
 rm(list = ls(all = TRUE))
 graphics.off()
 
@@ -44,12 +45,26 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
 # load dataset
 load("opti.RData")
-op = order(opti$value)
+load("vvd4t.RData")
+nu      = 0.5
+op      = order(opti$value)
 opti_10 = opti[op, ][1, ]  #keep the best one, Chapter 5.2
 opti_10 = opti_10[4:6]  #keep only parameters needed
 
 # plot
 layout(c(1, 2, 3, 4))
+Kernel = function(h, u, nu, a, b, beta, sigma) {
+  # same as in GeoCopula
+  y       = rep(1, length = length(h))
+  idx1    = which(h == 0)
+  idx2    = which(h != 0)
+  c1      = a^2 * u^2 + 1
+  c2      = a^2 * u^2 + beta
+  y[idx1] = sigma * beta/c1^nu/c2
+  y[idx2] = sigma * 2 * beta/c1^nu/c2/gamma(nu) * (b/2 * h[idx2] * (c1/c2)^0.5)^nu * 
+    besselK(b * h[idx2] * (c1/c2)^0.5, nu)
+  return(y)
+}
 plot_v = function(data, vv, par) {
   k         = list()
   k$par     = par
