@@ -2,7 +2,7 @@ Name of QuantLet : geocopula_est
 
 Published in : MTS
 
-Description : 'Produces the estimation results using GeoCopula approach.'
+Description : 'Produces the estimation results using GeoCopula approach and saves it as RDate file.'
 
 Keywords : 
 - graphical representation
@@ -19,7 +19,7 @@ Author : Weining Wang
 
 Submitted : Thur, June 30 2016 by Shi Chen
 
-Datafile : 'bb.dat, location_country.csv, fivecountries.RData'
+Datafile : 'location_country.csv, fivecountries.RData'
 
-Example : 
+Example : 'opti.RData'
 
