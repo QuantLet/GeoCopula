@@ -14,7 +14,6 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 load("fivecountries.RData")
 resultsres = commonans0915mac$vt  #uk, germany, france, italy, sweden
 
-#source("helpfun.r")
 transformC = function(data, method = "uniform") {
   f1    = function(x) {
   fn    = ecdf(x)
@@ -72,16 +71,15 @@ for (i in 1:nrow(na_indi)) {
     (vvd4[na_indi[i, 1] - 1, na_indi[i, 2]] + vvd4[na_indi[i, 1] + 1, na_indi[i, 2]])
 }
 
-start    = c(2009, 11)
-end      = c(2014, 12)
+start      = c(2009, 11)
+end        = c(2014, 12)
 time = seq(ISOdate(start[1], start[2], 28), ISOdate(end[1], end[2], 28), 
            by = "1 months")
-
 resultsres = commonans0915mac$vt  #uk, germany, france, italy, sweden
-d3       = t(resultsres)
-d4       = qnorm(transformC(d3) * nrow(d3)/(nrow(d3) + 1))  #formula 3.12 in paper
-data = d4
-da   = as.data.frame(as.vector(t(data)))
+d3         = t(resultsres)
+d4         = qnorm(transformC(d3) * nrow(d3)/(nrow(d3) + 1))  #formula 3.12 in paper
+data       = d4
+da         = as.data.frame(as.vector(t(data)))
 colnames(da) = "inf"
 
 namelist = c("UK", "Germany", "France", "Italy", "Sweden")
@@ -91,24 +89,24 @@ rownames(location) = location[, 1]
 location = location[namelist, ]
 location = location[, -1]
 #inflation    = STFDF(location, time, da)
-dd1  = (spDists(inflation@sp))
-dd   = dd1
+dd1      = (spDists(inflation@sp))
+dd       = dd1
 rm(location, time, da, inflation, dd1)
 
 # WLS as, initial parameter, Chapter 5.2 set multiple initial value for
 # WLS estimation
-a = c(1e-10, 0.5, 1)
-b = c(1e-20, 1e-05, 0.1, 0.3)
+a    = c(1e-10, 0.5, 1)
+b    = c(1e-20, 1e-05, 0.1, 0.3)
 beta = c(1e-10, 0.01, 0.5)
 
 # choice from multiple optimal points of WLS estimates
 fit.count = function(vv, a, b, beta) {
-  op = expand.grid(1:length(a), 1:length(b), 1:length(beta))
+  op   = expand.grid(1:length(a), 1:length(b), 1:length(beta))
   fitv = function(vv, a, b, beta) {
-  k = fit.vv(vv, a, b, beta, nu)
+  k    = fit.vv(vv, a, b, beta, nu)
   return(c(k$par, k$value))
   }
-  k = sapply(1:nrow(op), function(i) fitv(vv, a = a[op[i, 1]], b = b[op[i, 
+  k    = sapply(1:nrow(op), function(i) fitv(vv, a = a[op[i, 1]], b = b[op[i, 
                                                                         2]], beta = beta[op[i, 3]]))
   xabc = function(x, abc) {
     abc[x]
@@ -144,17 +142,16 @@ fit.vv = function(vv, a = 0.01, b = 0.005, beta = 0.1, nu) {
 
 Kernel = function(h, u, nu, a, b, beta, sigma) {
   # same as in GeoCopula
-  y = rep(1, length = length(h))
-  idx1 = which(h == 0)
-  idx2 = which(h != 0)
-  c1 = a^2 * u^2 + 1
-  c2 = a^2 * u^2 + beta
+  y       = rep(1, length = length(h))
+  idx1    = which(h == 0)
+  idx2    = which(h != 0)
+  c1      = a^2 * u^2 + 1
+  c2      = a^2 * u^2 + beta
   y[idx1] = sigma * beta/c1^nu/c2
   y[idx2] = sigma * 2 * beta/c1^nu/c2/gamma(nu) * (b/2 * h[idx2] * (c1/c2)^0.5)^nu * 
     besselK(b * h[idx2] * (c1/c2)^0.5, nu)
   return(y)
 }
 
-#system.time(opti = fit.count(vvd4t, a, b, beta))
 opti = fit.count(vvd4t, a, b, beta)
 save(opti, file = "opti.RData")
