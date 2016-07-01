@@ -21,7 +21,5 @@ Submitted : Thur, June 30 2016 by Shi Chen
 
 Datafile : 'opti.RData, vvd4t.RData'
 
-Example :
-- 'The empirical fitted variogram by GeoCopula.'
-- 'The parametrically fitted variogram by GeoCopula.'
+Example : 'The parametrically fitted variogram by GeoCopula.'
 
