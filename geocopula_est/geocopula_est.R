@@ -106,8 +106,8 @@ fit.count = function(vv, a, b, beta) {
   k    = fit.vv(vv, a, b, beta, nu)
   return(c(k$par, k$value))
   }
-  k    = sapply(1:nrow(op), function(i) fitv(vv, a = a[op[i, 1]], b = b[op[i, 
-                                                                        2]], beta = beta[op[i, 3]]))
+  k    = sapply(1:nrow(op), function(i) fitv(vv, a = a[op[i, 1]], 
+                                             b = b[op[i, 2]], beta = beta[op[i, 3]]))
   xabc = function(x, abc) {
     abc[x]
   }
